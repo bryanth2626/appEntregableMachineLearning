@@ -1,0 +1,25 @@
+body{
+      background-color: aqua;
+      text-align: center;
+      font-family: Arial;
+    }
+
+    .miniaturas img{
+      width: 120px;
+      height: 120px;
+      margin: 10px;
+      border: 3px solid black;
+      cursor: pointer;
+    }
+
+    canvas{
+      border: 3px solid black;
+      margin-top: 20px;
+    }
+
+    input{
+      width: 250px;
+      height: 35px;
+      margin: 10px;
+      font-size: 18px;
+    }

@@ -1,11 +1,234 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="css/partes_rostro.css">
+
+  <meta name="viewport"
+  content="width=device-width, initial-scale=1.0">
+
+  <title>Partes del rostro</title>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.10/p5.min.js"></script>
+
+  <script src="https://unpkg.com/ml5@1/dist/ml5.min.js"></script>
+
+  
 </head>
+
 <body>
-    
+
+<h1>Detección de partes del rostro</h1>
+
+<!-- PARTES DEL ROSTRO -->
+<select id="parte">
+
+  <option value="izquierdo">
+    Ojo izquierdo
+  </option>
+
+  <option value="derecho">
+    Ojo derecho
+  </option>
+
+  <option value="nariz">
+    Nariz
+  </option>
+
+  <option value="labios">
+    Labios
+  </option>
+
+</select>
+
+<!-- COLOR -->
+<select id="color">
+
+  <option value="red">
+    Rojo
+  </option>
+
+  <option value="blue">
+    Azul
+  </option>
+
+  <option value="green">
+    Verde
+  </option>
+
+  <option value="yellow">
+    Amarillo
+  </option>
+
+</select>
+
+<script>
+
+let faceMesh;
+
+let video;
+
+let faces = [];
+
+let options = {
+
+  maxFaces:1,
+
+  refineLandmarks:false,
+
+  flipHorizontal:false
+
+};
+
+function preload(){
+
+  // cargar modelo
+  faceMesh =
+  ml5.faceMesh(options);
+
+}
+
+function setup(){
+
+  createCanvas(640,480);
+
+  // webcam
+  video = createCapture(VIDEO);
+
+  video.size(640,480);
+
+  video.hide();
+
+  // detectar rostro
+  faceMesh.detectStart(video, gotFaces);
+
+}
+
+function draw(){
+
+  background(220);
+
+  // CAMARA NORMAL
+  push();
+
+  translate(width,0);
+
+  scale(-1,1);
+
+  image(video,0,0,width,height);
+
+  // si hay rostro
+  if(faces.length > 0){
+
+    let face = faces[0];
+
+    let puntos =
+    face.keypoints;
+
+    // seleccion
+    let parte =
+    document.getElementById("parte").value;
+
+    // color seleccionado
+    let color =
+    document.getElementById("color").value;
+
+    fill(color);
+
+    noStroke();
+
+    // OJO IZQUIERDO
+    if(parte == "izquierdo"){
+
+      dibujarParte([
+        puntos[130],
+        puntos[133],
+        puntos[159],
+        puntos[145]
+      ]);
+
+    }
+
+    // OJO DERECHO
+    if(parte == "derecho"){
+
+      dibujarParte([
+        puntos[362],
+        puntos[263],
+        puntos[386],
+        puntos[374]
+      ]);
+    }
+
+    // NARIZ
+    if(parte == "nariz"){
+
+      dibujarParte([
+        puntos[1],
+        puntos[2],
+        puntos[98]
+      ]);
+    }
+
+    // LABIOS
+    if(parte == "labios"){
+
+      dibujarParte([
+        puntos[13],
+        puntos[14],
+        puntos[78],
+        puntos[308]
+      ]);
+
+    }
+
+  }
+  //Restaura la configuración gráfica anterior.
+
+  pop();
+
+}
+// dibujar puntos
+function dibujarPuntos(parteCara){
+
+  for(let i=0; i<parteCara.length; i++){
+
+    let punto =
+    parteCara[i];
+
+    circle(
+      width - punto.x,
+      punto.y,
+      10
+    );
+
+  }
+
+}
+function dibujarParte(parteCara){
+
+  for(let i = 0; i < parteCara.length; i++){
+
+    let punto = parteCara[i];
+
+    circle(
+      width - punto.x,
+      punto.y,
+      10
+    );
+
+  }
+
+}
+
+// guardar resultados
+function gotFaces(results){
+
+  faces = results;
+
+}
+
+</script>
+
 </body>
 </html>
