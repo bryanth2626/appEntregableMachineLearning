@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.10/p5.min.js"></script>
+  <script src="https://unpkg.com/ml5@0.12.2/dist/ml5.min.js"></script>
+</head>
+
+<body>
+
+<h2>Detector de Personas</h2>
+
+<p id="estado">
+Esperando...
+</p>
+
+<script>
+
+let video;
+let detector;
+let objetos = [];
+
+let personaDetectada = false;
+
+let tiempoInicio = 0;
+let segundos = 0;
+
+let alarmaSonando = false;
+
+let alarma;
+
+function preload(){
+
+  detector = ml5.objectDetector("cocossd");
+
+  alarma = new Audio(
+    "https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg"
+  );
+
+  alarma.loop = true;
+
+}
+
+function setup(){
+
+  createCanvas(640,480);
+
+  video = createCapture(VIDEO);
+
+  video.size(640,480);
+
+  video.hide();
+
+  video.elt.onloadeddata = () => {
+
+    console.log("Camara lista");
+
+    detector.detect(
+      video,
+      gotDetections
+    );
+
+  };
+
+}
+
+function draw(){
+
+  image(video,0,0,width,height);
+
+  let hayPersona = false;
+
+  for(let i=0;i<objetos.length;i++){
+
+    let o = objetos[i];
+
+    if(o.label == "person"){
+
+      hayPersona = true;
+
+      noFill();
+      stroke(0,255,0);
+      strokeWeight(3);
+
+      rect(
+        o.x,
+        o.y,
+        o.width,
+        o.height
+      );
+
+      fill(0,255,0);
+      noStroke();
+
+      textSize(20);
+
+      text(
+        "PERSONA",
+        o.x,
+        o.y-10
+      );
+
+    }
+
+  }
+
+  if(hayPersona){
+
+    if(!personaDetectada){
+
+      personaDetectada = true;
+
+      tiempoInicio = millis();
+
+      alarmaSonando = false;
+
+    }
+
+    segundos =
+      (millis() - tiempoInicio) / 1000;
+
+    document.getElementById(
+      "estado"
+    ).innerHTML =
+      "Persona detectada por "
+      + segundos.toFixed(1)
+      + " segundos";
+
+    // BARRA DE PROGRESO
+
+    fill(200);
+    rect(20,430,300,30);
+
+    fill(0,255,0);
+
+    let anchoBarra =
+      map(
+        segundos,
+        0,
+        5,
+        0,
+        300
+      );
+
+    anchoBarra =
+      constrain(
+        anchoBarra,
+        0,
+        300
+      );
+
+    rect(
+      20,
+      430,
+      anchoBarra,
+      30
+    );
+
+    if(
+      segundos >= 5 &&
+      !alarmaSonando
+    ){
+
+      alarma.play();
+
+      alarmaSonando = true;
+
+      document.getElementById(
+        "estado"
+      ).innerHTML =
+      "⚠ ALERTA: Persona detectada más de 5 segundos";
+
+    }
+
+  }else{
+
+    personaDetectada = false;
+
+    segundos = 0;
+
+    document.getElementById(
+      "estado"
+    ).innerHTML =
+      "No hay personas";
+
+    if(alarmaSonando){
+
+      alarma.pause();
+
+      alarma.currentTime = 0;
+
+      alarmaSonando = false;
+
+    }
+
+  }
+
+}
+
+function gotDetections(error, results){
+
+  if(!error){
+
+    objetos = results;
+
+  }
+
+  detector.detect(
+    video,
+    gotDetections
+  );
+
+}
+
+</script>
+
+</body>
+</html>
