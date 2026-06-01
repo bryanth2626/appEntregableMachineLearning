@@ -18,9 +18,8 @@ Esperando...
 <script>
 
 let video;
-let detector;
-let objetos = [];
-
+let detector; // Guarda el modelo COCO-SSD que detecta objetos.
+let objetos = []; // Lista donde se guardan todos los objetos encontrados.
 
 let tiempoInicio = 0;
 
@@ -30,11 +29,15 @@ let alarma;
 
 function preload(){
 
+  // COCO SSD es un modelo que reconoce: personas celulares botellas sillas autos
+
   detector = ml5.objectDetector("cocossd");
 
   alarma = new Audio(
     "https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg"
   );
+
+  //Hace que el sonido se repita indefinidamente.
 
   alarma.loop = true;
 
@@ -47,9 +50,12 @@ function setup(){
   video = createCapture(VIDEO);
 
   video.size(640,480);
-
+  // Oculta el video HTML para mostrarlo en el canvas.
   video.hide();
 
+  // .elt:Obtiene el elemento HTML real del video.
+  // .onloadeddata: Se activa cuando el video ya cargó.
+  // Cuando el video de la cámara termine de cargar sus primeros datos, ejecuta el código que está dentro de las llave
   video.elt.onloadeddata = () => {
 
     console.log("Camara lista");
@@ -69,19 +75,27 @@ function draw(){
 
   let hayPersona = false;
 
+  // Recorrer todos los objetos detectados
   for(let i=0;i<objetos.length;i++){
 
+    // Guarda el objeto actual en la variable o para facilitar su uso.
     let o = objetos[i];
 
     if(o.label == "person"){
 
       hayPersona = true;
 
+      // Quita el color de relleno.
       noFill();
       stroke(0,255,0);
-      strokeWeight(3);
+      //Define el grosor del borde.
+      strokeWeight(3);  
 
+      // Width: Ancho del rectángulo.
+      // Height: Alto del rectángulo.
+      // Dibuja un rectángulo alrededor del objeto detectado.
       rect(
+        // Posición horizontal donde empieza el rectángulo.
         o.x,
         o.y,
         o.width,
@@ -89,6 +103,7 @@ function draw(){
       );
 
       fill(0,255,0);
+      //No dibujar borde ni contorno.
       noStroke();
 
       textSize(20);
@@ -122,8 +137,7 @@ function draw(){
     + segundos.toFixed(1)
     + " segundos";
 
-  // Texto del contador
-
+  // Texto del contador color blanco
   fill(255);
   textSize(20);
 
@@ -175,7 +189,7 @@ function draw(){
     document.getElementById(
       "estado"
     ).innerHTML =
-      "⚠ ALERTA: Persona detectada más de 5 segundos";
+      "Persona detectada más de 5 segundos";
 
   }
 
@@ -189,7 +203,7 @@ function draw(){
       "No hay personas";
 
     alarma.pause();
-
+    // Regresar el audio al segundo 0
     alarma.currentTime = 0;
 
     alarmaSonando = false;
@@ -210,8 +224,6 @@ function gotDetections(error, results){
   );
 
 }
-
 </script>
-
 </body>
 </html>
