@@ -16,11 +16,11 @@
 
 <script>
 
-let handPose;
+let handPose; //modelo deteccion de manos
 
 let video;
 
-let hands = [];
+let hands = []; // almacena las manos detectadas
 
 function preload(){
 
@@ -47,7 +47,7 @@ function setup(){
 
 function draw(){
 
-  // CAMARA NORMAL
+  // Guarda la configuración actual del canvas.
   push();
 
   translate(width,0);
@@ -59,7 +59,7 @@ function draw(){
   // SI HAY 2 MANOS
   if(hands.length >= 2){
 
-    // INDICE MANO 1
+    // // index_finger_tip: Punta del dedo índice.
     let dedo1 =
     hands[0].index_finger_tip;
 
@@ -71,7 +71,7 @@ function draw(){
     fill(0,255,0);
 
     noStroke();
-
+    //width ancho
     circle(width - dedo1.x, dedo1.y, 20);
 
     circle(width - dedo2.x, dedo2.y, 20);
@@ -90,6 +90,7 @@ function draw(){
 
   }
 
+  // restaura la configuración normal del canvas después de haber aplicado el efecto espejo.
   pop();
 
 }

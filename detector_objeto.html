@@ -21,10 +21,8 @@ let video;
 let detector;
 let objetos = [];
 
-let personaDetectada = false;
 
 let tiempoInicio = 0;
-let segundos = 0;
 
 let alarmaSonando = false;
 
@@ -107,97 +105,97 @@ function draw(){
 
   if(hayPersona){
 
-    if(!personaDetectada){
+  // Inicia el conteo la primera vez
+  if(tiempoInicio == 0){
+    tiempoInicio = millis();
+  }
 
-      personaDetectada = true;
+  let segundos =
+    (millis() - tiempoInicio) / 1000;
 
-      tiempoInicio = millis();
+  // Mensaje
 
-      alarmaSonando = false;
+  document.getElementById(
+    "estado"
+  ).innerHTML =
+    "Persona detectada por "
+    + segundos.toFixed(1)
+    + " segundos";
 
-    }
+  // Texto del contador
 
-    segundos =
-      (millis() - tiempoInicio) / 1000;
+  fill(255);
+  textSize(20);
+
+  text(
+    segundos.toFixed(1) + " / 5 s",
+    20,
+    420
+  );
+
+  // Barra gris (fondo)
+
+  fill(200);
+
+  rect(
+    20,
+    430,
+    300,
+    30
+  );
+
+  // Barra verde (progreso)
+
+  fill(0,255,0);
+
+  let anchoBarra =
+    min(
+      segundos * 60,
+      300
+    );
+
+  rect(
+    20,
+    430,
+    anchoBarra,
+    30
+  );
+
+  // Alarma al llegar a 5 segundos
+
+  if(
+    segundos >= 5 &&
+    !alarmaSonando
+  ){
+
+    alarma.play();
+
+    alarmaSonando = true;
 
     document.getElementById(
       "estado"
     ).innerHTML =
-      "Persona detectada por "
-      + segundos.toFixed(1)
-      + " segundos";
-
-    // BARRA DE PROGRESO
-
-    fill(200);
-    rect(20,430,300,30);
-
-    fill(0,255,0);
-
-    let anchoBarra =
-      map(
-        segundos,
-        0,
-        5,
-        0,
-        300
-      );
-
-    anchoBarra =
-      constrain(
-        anchoBarra,
-        0,
-        300
-      );
-
-    rect(
-      20,
-      430,
-      anchoBarra,
-      30
-    );
-
-    if(
-      segundos >= 5 &&
-      !alarmaSonando
-    ){
-
-      alarma.play();
-
-      alarmaSonando = true;
-
-      document.getElementById(
-        "estado"
-      ).innerHTML =
       "⚠ ALERTA: Persona detectada más de 5 segundos";
 
-    }
+  }
 
   }else{
 
-    personaDetectada = false;
-
-    segundos = 0;
+    tiempoInicio = 0;
 
     document.getElementById(
       "estado"
     ).innerHTML =
       "No hay personas";
 
-    if(alarmaSonando){
+    alarma.pause();
 
-      alarma.pause();
+    alarma.currentTime = 0;
 
-      alarma.currentTime = 0;
-
-      alarmaSonando = false;
-
-    }
+    alarmaSonando = false;
 
   }
-
 }
-
 function gotDetections(error, results){
 
   if(!error){

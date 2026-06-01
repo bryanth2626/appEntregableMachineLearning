@@ -25,6 +25,13 @@ let resultado = "";
 let confianza = 0;
 let ultimaPalabra = "";
 
+
+/* El modelo de Teachable Machine utiliza carga asíncrona.
+Por eso empleé async y await en setup(), para esperar que
+el modelo cargue correctamente antes de empezar a detectar objetos. */
+
+
+// Prepara el programa: crea la cámara, el canvas y carga el modelo.
 async function setup(){
 
   createCanvas(640,480);
@@ -36,6 +43,7 @@ async function setup(){
   const modelURL = "modelo/model.json";
   const metadataURL = "modelo/metadata.json";
 
+  // await: Espera hasta terminar de cargar el modelo antes de continuar.
   modelo = await tmImage.load(
     modelURL,
     metadataURL
@@ -46,6 +54,8 @@ async function setup(){
   clasificarVideo();
 
 }
+
+// Muestra la cámara y los resultados en pantalla.
 
 function draw(){
 
@@ -65,9 +75,13 @@ function draw(){
 
 }
 
+// Analiza la imagen, detecta el objeto y actualiza el resultado.
+
 async function clasificarVideo(){
 
+  // Le envía una imagen de la cámara al modelo.
   const prediction =
+  // .elt obtiene el elemento real del video para que Teachable Machine pueda analizar la imagen capturada por la cámara.
   await modelo.predict(
     video.elt
   );
@@ -75,6 +89,8 @@ async function clasificarVideo(){
   let mejor =
   prediction[0];
 
+  // Recorre todas las predicciones del modelo para encontrar la que tiene la mayor probabilidad.
+  // length: Cantidad de elementos.
   for(let i=1;i<prediction.length;i++){
 
     if(
@@ -86,6 +102,7 @@ async function clasificarVideo(){
     }
 
   }
+  // Nombre de la clase es el nombre que puse en Teachable Machine.
 
   resultado =
   mejor.className;
@@ -103,7 +120,11 @@ async function clasificarVideo(){
   confianza +
   "%";
 
+  // Controla cuándo debe hablar la voz.
+
   if(confianza > 50){
+
+    // ¿El objeto detectado es diferente al último que se dijo?
 
     if(resultado != ultimaPalabra){
 
@@ -114,6 +135,8 @@ async function clasificarVideo(){
 
       voz.lang = "es-ES";
 
+
+      //Sistema del navegador que convierte texto en voz.
       speechSynthesis.speak(
         voz
       );
@@ -126,11 +149,13 @@ async function clasificarVideo(){
   }
 
   console.log(prediction);
-
+  // Ejecutar algo después de cierto tiempo.
   setTimeout(
     clasificarVideo,
     300
   );
+
+  //No utilicé draw pq cargaria 60 veces pro segundo el modelo, lo que no es necesario. En cambio, con setTimeout() controlo cada cuanto tiempo se analiza la imagen.
 
 }
 
