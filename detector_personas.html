@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.10/p5.min.js"></script>
+  <script src="https://unpkg.com/ml5@0.12.2/dist/ml5.min.js"></script>
+</head>
+
+<body>
+
+<h2>Detector de Personas</h2>
+
+<p id="estado">
+Esperando...
+</p>
+
+<script>
+
+let video;
+let detector; // Guarda el modelo COCO-SSD que detecta objetos.
+let objetos = []; // Lista donde se guardan todos los objetos encontrados.
+
+let tiempoInicio = 0;
+
+let alarmaSonando = false;
+
+let alarma;
+
+function preload(){
+
+  // COCO SSD es un modelo que reconoce: personas celulares botellas sillas autos
+
+  detector = ml5.objectDetector("cocossd");
+
+  alarma = new Audio(
+    "https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg"
+  );
+
+  //Hace que el sonido se repita indefinidamente.
+
+  alarma.loop = true;
+
+}
+
+function setup(){
+
+  createCanvas(640,480);
+
+  video = createCapture(VIDEO);
+
+  video.size(640,480);
+  // Oculta el video HTML para mostrarlo en el canvas.
+  video.hide();
+
+  // .elt:Obtiene el elemento HTML real del video.
+  // .onloadeddata: Se activa cuando el video ya cargó.
+  // Cuando el video de la cámara termine de cargar sus primeros datos, ejecuta el código que está dentro de las llave
+  video.elt.onloadeddata = () => {
+
+    console.log("Camara lista");
+
+    detector.detect(
+      video,
+      gotDetections
+    );
+
+  };
+
+}
+
+function draw(){
+
+  image(video,0,0,width,height);
+
+  let hayPersona = false;
+
+  // Recorrer todos los objetos detectados
+  for(let i=0;i<objetos.length;i++){
+
+    // Guarda el objeto actual en la variable o para facilitar su uso.
+    let o = objetos[i];
+
+    if(o.label == "person"){
+
+      hayPersona = true;
+
+      // Quita el color de relleno.
+      noFill();
+      stroke(0,255,0);
+      //Define el grosor del borde.
+      strokeWeight(3);  
+
+      // Width: Ancho del rectángulo.
+      // Height: Alto del rectángulo.
+      // Dibuja un rectángulo alrededor del objeto detectado.
+      rect(
+        // Posición horizontal donde empieza el rectángulo.
+        o.x,
+        o.y,
+        o.width,
+        o.height
+      );
+
+      fill(0,255,0);
+      //No dibujar borde ni contorno.
+      noStroke();
+
+      textSize(20);
+
+      text(
+        "PERSONA",
+        o.x,
+        o.y-10
+      );
+
+    }
+
+  }
+
+  if(hayPersona){
+
+  // Inicia el conteo la primera vez
+  if(tiempoInicio == 0){
+    tiempoInicio = millis();
+  }
+
+  let segundos =
+    (millis() - tiempoInicio) / 1000;
+
+  // Mensaje
+
+  document.getElementById(
+    "estado"
+  ).innerHTML =
+    "Persona detectada por "
+    + segundos.toFixed(1)
+    + " segundos";
+
+  // Texto del contador color blanco
+  fill(255);
+  textSize(20);
+
+  text(
+    segundos.toFixed(1) + " / 5 s",
+    20,
+    420
+  );
+
+  // Barra gris (fondo)
+
+  fill(200);
+
+  rect(
+    20,
+    430,
+    300,
+    30
+  );
+
+  // Barra verde (progreso)
+
+  fill(0,255,0);
+
+  let anchoBarra =
+    min(
+      segundos * 60,
+      300
+    );
+
+  rect(
+    20,
+    430,
+    anchoBarra,
+    30
+  );
+
+  // Alarma al llegar a 5 segundos
+
+  if(
+    segundos >= 5 &&
+    !alarmaSonando
+  ){
+
+    alarma.play();
+
+    alarmaSonando = true;
+
+    document.getElementById(
+      "estado"
+    ).innerHTML =
+      "Persona detectada más de 5 segundos";
+
+  }
+
+  }else{
+
+    tiempoInicio = 0;
+
+    document.getElementById(
+      "estado"
+    ).innerHTML =
+      "No hay personas";
+
+    alarma.pause();
+    // Regresar el audio al segundo 0
+    alarma.currentTime = 0;
+
+    alarmaSonando = false;
+
+  }
+}
+function gotDetections(error, results){
+
+  if(!error){
+
+    objetos = results;
+
+  }
+
+  detector.detect(
+    video,
+    gotDetections
+  );
+
+}
+</script>
+</body>
+</html>

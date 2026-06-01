@@ -65,9 +65,7 @@ let options = {
 
   maxFaces:1,
 
-  // No usa puntos faciales ultra detallados.
-  refineLandmarks:false,
-
+  // Indica que la imagen no debe voltearse como un espejo.
   flipHorizontal:false
 
 };
@@ -75,8 +73,7 @@ let options = {
 function preload(){
 
   // cargar modelo
-  faceMesh =
-  ml5.faceMesh(options);
+  faceMesh = ml5.faceMesh(options);
 
 }
 
@@ -121,6 +118,7 @@ function draw(){
 
     let puntos =
     face.keypoints;
+    // obtiene la opción seleccionada.
 
     // seleccion
     let parte =
@@ -178,7 +176,7 @@ function draw(){
 
 
 function dibujarParte(parteCara){
-
+  // Recorre todos los puntos.
   for(let i = 0; i < parteCara.length; i++){
 
     let punto = parteCara[i];

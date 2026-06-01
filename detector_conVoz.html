@@ -122,13 +122,15 @@ async function clasificarVideo(){
 
   // Controla cuándo debe hablar la voz.
 
-  if(confianza > 50){
+  if(confianza > 70){
 
     // ¿El objeto detectado es diferente al último que se dijo?
 
     if(resultado != ultimaPalabra){
 
       let voz =
+      
+      // crea el texto que se va a pronunciar
       new SpeechSynthesisUtterance(
         resultado
       );
